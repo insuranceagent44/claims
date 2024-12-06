@@ -1,23 +1,28 @@
 using System.Text.Json.Serialization;
-using Claims;
-using Claims.Auditing;
-using Claims.Controllers;
+using Claims.Audit;
+using Claims.Audit.Models;
+using Claims.Models;
+using Claims.PremiumCalculator;
+using Claims.Services;
+using Claims.Validators;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services
-    .AddControllers()
+    .AddControllers(options =>
+    {
+        
+    })
     .AddJsonOptions(x =>
     {
         x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
 
-builder.Services.AddDbContext<AuditContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AuditContext>(options => 
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 builder.Services.AddDbContext<ClaimsContext>(
     options =>
     {
@@ -27,13 +32,24 @@ builder.Services.AddDbContext<ClaimsContext>(
     }
 );
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.EnableAnnotations();
+});
+
+builder.Services.AddAudit();
+
+builder.Services.AddScoped<IAuditService, AuditService>();
+builder.Services.AddScoped<IClaimService, ClaimService>();
+builder.Services.AddScoped<ICoverService, CoverService>();
+builder.Services.AddScoped<IPremiumCalculator, PremiumCalculator>();
+builder.Services.AddScoped<ClaimValidator>();
+builder.Services.AddScoped<CoverValidator>();
+builder.Services.AddScoped<IPremiumTypeFactory, PremiumTypeFactory>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -41,9 +57,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
@@ -54,4 +68,7 @@ using (var scope = app.Services.CreateScope())
 
 app.Run();
 
-public partial class Program { }
+namespace Claims
+{
+    public partial class Program { }
+}
