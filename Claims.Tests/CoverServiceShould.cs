@@ -1,8 +1,5 @@
 using Claims.Models;
 using Claims.PremiumCalculator;
-using Claims.Services;
-using Microsoft.EntityFrameworkCore;
-using Moq;
 using Xunit;
 using FluentAssertions;
 

@@ -75,8 +75,7 @@ public class CoversController : ControllerBase
     [ProducesResponseType(typeof(string), StatusCodes.Status204NoContent)]
     [SwaggerOperation(Summary = "Delete a cover with the given id.", Description = 
         """
-        Create an new cover. A cover can not have a start date in the past and the total 
-        insurance period cannot exceed 1 year.
+        Delete a cover.
         """)]
     public async Task<ActionResult> DeleteAsync([FromRoute] [Required] string id)
     {
